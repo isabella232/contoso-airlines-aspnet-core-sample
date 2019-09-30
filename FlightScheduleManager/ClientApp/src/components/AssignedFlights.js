@@ -37,7 +37,7 @@ export class AssignedFlights extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (this.props.refresh !== props.refresh)
+    if (props.refresh)
     {
       this.setState({ isDataLoaded: false });
       this.loadFlights();
@@ -55,6 +55,22 @@ export class AssignedFlights extends Component {
 
     if (response.ok) {
       let flights = await response.json();
+
+      if (this.props.justJoinedFlights.length > 0) {
+        console.log(`There are just-joined flights: ${JSON.stringify(this.props.justJoinedFlights)}`);
+
+        this.props.justJoinedFlights.forEach(function(flight) {
+          // Check if the flight is already in the list
+          // Sometimes it gets added quickly and we don't want to duplicate
+          if (flights.find( ({number}) => number === flight.number) === undefined) {
+            flights.push(flight);
+            console.log(`Flight list after adding flight ${flight.number}: ${JSON.stringify(flights)}`);
+          } else {
+            console.log(`Not adding flight ${flight.number} as it already exists on user calendar`);
+          }
+        });
+      }
+
       this.setState( { flights: flights, isDataLoaded: true });
       console.log(`Flight data: ${JSON.stringify(flights)}`);
     } else {

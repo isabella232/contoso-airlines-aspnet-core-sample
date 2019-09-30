@@ -26,7 +26,8 @@ export class FlightAttendantView extends Component {
     this.state = {
       showSignUp: false,
       selectedFlight: null,
-      refreshLists: false
+      refreshLists: false,
+      justJoinedFlights: []
     };
   }
 
@@ -47,29 +48,32 @@ export class FlightAttendantView extends Component {
 
     if (!response.ok) {
       console.log(`Error updating flight: ${response.status}`);
-    }
+    } else {
+      // Add an entry to the flight attendants so the color
+      // updates appropriately
+      updatedFlight.flightCrew.push("me");
 
-    this.onPanelDismissed(true);
+      let joinedFlights = this.state.justJoinedFlights;
+      joinedFlights.push(updatedFlight);
+
+      this.setState({
+        showSignUp: false,
+        refreshLists: true,
+        justJoinedFlights: joinedFlights
+      });
+    }
   }
 
   onAvailableFlightSelected(flight) {
     console.log(`Flight selected ${JSON.stringify(flight)}`);
     console.log(`Current state: ${JSON.stringify(this.state)}`);
-    this.setState({ showSignUp: true, selectedFlight: flight });
+    this.setState({ showSignUp: true, refreshLists: false, selectedFlight: flight });
   }
 
-  onPanelDismissed(needsRefresh) {
-    let state = {
-      showSignUp: false,
-      refreshLists: false
-    }
-
-    if (needsRefresh) {
-      console.log('refresh needed');
-      state.refreshLists = true;
-    }
-
-    this.setState(state);
+  onPanelDismissed() {
+    this.setState({
+      showSignUp: false
+    });
   }
 
   onRenderPanelFooter() {
@@ -92,7 +96,7 @@ export class FlightAttendantView extends Component {
           <h1 className="ms-font-su">Flight Sign-up</h1>
           <Separator/>
           <h2 className="ms-font-xxl">Upcoming flights</h2>
-          <AssignedFlights refresh={this.state.refreshLists} />
+          <AssignedFlights refresh={this.state.refreshLists} justJoinedFlights={this.state.justJoinedFlights} />
           <Separator/>
           <h2 className="ms-font-xxl">Available flights</h2>
           <AvailableFlights refresh={this.state.refreshLists} onFlightSelected={this.onAvailableFlightSelected.bind(this)}/>

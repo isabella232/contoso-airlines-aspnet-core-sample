@@ -38,7 +38,7 @@ export class AvailableFlights extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (this.props.refresh !== props.refresh)
+    if (props.refresh)
     {
       this.setState({ isDataLoaded: false });
       this.loadFlights();
